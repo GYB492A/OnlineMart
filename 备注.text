@@ -1,0 +1,2 @@
+图片存储地址默认在G://OnlineMart//img
+可在com/example/onlinemart/util/Constant.java下的public static final String IMG_DIRECTORY_PATH = "G://OnlineMart//img"
