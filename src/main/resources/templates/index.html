@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaaf.org"
+      xmlns:sec="http://www.thymeleaaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+
+    <title>商城主页</title>
+</head>
+<style>
+    .image-container {
+        position: relative;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain; /* 或者使用 cover 来铺满整个 <div> */
+        width: 100%;
+        height: 100%;
+    }
+</style>
+<body>
+<!--导航条-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/index">网上商城</a>
+    <div class="container d-flex flex-column flex-md-row justify-content-between navbar-nav">
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">我的淘宝</a>
+        <a class="nav-link" href="/myOrder?curPage=1&rowsPerPage=24" sec:authorize="hasRole('BUYER')">我的订单</a>
+        <a class="nav-link" href="/myShoppingCar" sec:authorize="hasRole('BUYER')">我的购物车</a>
+        <a class="nav-link" href="/myProduct?curPage=1&rowsPerPage=24" sec:authorize="hasRole('SELLER')">我的商品</a>
+        <a class="nav-link" href="/productList?curPage=1&rowsPerPage=24">商品分类</a>
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">登陆/注册</a>
+        <a class="nav-link"  sec:authorize="!isAnonymous()"
+           th:text="'欢迎您!' + ${#authentication.getName()}">欢迎您！ xxx</a>
+        <a class="nav-link" href="/logout" sec:authorize="!isAnonymous()">安全退出</a>
+    </div>
+</nav>
+
+<!--搜索框-->
+<div id="mContainer" class="container">
+    <div class="input-group mt-5">
+        <input type="text" class="form-control" placeholder="请输入关键字"
+               v-model="keyWord">
+        <div class="input-group-append">
+            <a class="ml-3 btn btn-outline-secondary"
+               v-bind:href="'/productList?curPage=1&rowsPerPage=24&typeId=1&keyWord=' + keyWord">
+                搜索</a>
+        </div>
+    </div>
+    <!--    轮播图-->
+    <div class="carousel slide mt-3" data-ride="carousel">
+        <div class="carousel-inner embed-responsive embed-responsive-16by9">
+            <div class="carousel-item embed-responsive-item  active">
+                <img src="/image/billBoard1.jpg" class="d-block w-100" style="max-height: 400px" alt="..."/>
+            </div>
+            <div class="carousel-item embed-responsive-item">
+                <img src="/image/billBoard2.jpg" class="d-block w-100" style="max-height: 400px" alt="..."/>
+            </div>
+            <div class="carousel-item embed-responsive-item">
+                <img src="/image/billBoard3.jpg" class="d-block w-100" style="max-height: 400px" alt="..."/>
+            </div>
+        </div>
+    </div>
+
+<!--    服饰热卖-->
+    <div class="p-3 d-flex align-items-center border mt-3">
+        <div class="bg-danger" style="width: 16px;height: 32px;"></div>
+        <div class="h4 ml-3">服饰热卖</div>
+        <a href="/productList?curPage=1&rowsPerPage=24&typeId=1" class="h4 ml-auto">More</a>
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+        <div class="card" style="width: 16rem; height: 25rem" v-for="product in clothes">
+            <div style="height: 40%; width: 100%" class="d-flex justify-content align-items-center">
+                <div class="image-container" :style="'background-image: url(/image/' + product.picPath + ')'"></div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">&yen;{{product.price}}</h5>
+                <a :href="'/productDetail?productId='+product.productId" class="stretched-link">{{product.name}}</a>
+                <p class="card-text">{{product.sellerName}}</p>
+            </div>
+        </div>
+    </div>
+
+
+<!--    鞋包热卖-->
+    <div class="p-3 d-flex align-items-center border mt-3">
+        <div class="bg-primary" style="width: 16px;height: 32px;"></div>
+        <div class="h4 ml-3">鞋包热卖</div>
+        <a href="/productList?curPage=1&rowsPerPage=24&typeId=2" class="h4 ml-auto">More</a>
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+        <div class="card" style="width: 16rem; height: 25rem" v-for="product in bags">
+            <div style="height: 40%; width: 100%" class="d-flex justify-content align-items-center">
+                <div class="image-container" :style="'background-image: url(/image/' + product.picPath + ')'"></div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">&yen;{{product.price}}</h5>
+                <a :href="'/productDetail?productId='+product.productId" class="stretched-link">{{product.name}}</a>
+                <p class="card-text">{{product.sellerName}}</p>
+            </div>
+        </div>
+    </div>
+
+
+<!--    家电热卖-->
+    <div class="p-3 d-flex align-items-center border mt-3">
+        <div class="bg-warning" style="width: 16px;height: 32px;"></div>
+        <div class="h4 ml-3">家电热卖</div>
+        <a href="/productList?curPage=1&rowsPerPage=24&typeId=3" class="h4 ml-auto">More</a>
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+        <div class="card" style="width: 16rem; height: 25rem" v-for="product in homeApply">
+            <div style="height: 40%; width: 100%" class="d-flex justify-content align-items-center">
+                <div class="image-container" :style="'background-image: url(/image/' + product.picPath + ')'"></div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">&yen;{{product.price}}</h5>
+                <a :href="'/productDetail?productId='+product.productId" class="stretched-link">{{product.name}}</a>
+                <p class="card-text">{{product.sellerName}}</p>
+            </div>
+        </div>
+    </div>
+
+<!--    家具热卖-->
+    <div class="p-3 d-flex align-items-center border mt-3">
+        <div class="bg-success" style="width: 16px;height: 32px;"></div>
+        <div class="h4 ml-3">家具热卖</div>
+        <a href="/productList?curPage=1&rowsPerPage=24&typeId=4" class="h4 ml-auto">More</a>
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+        <div class="card" style="width: 16rem; height: 25rem" v-for="product in furniture">
+            <div style="height: 40%; width: 100%" class="d-flex justify-content align-items-center">
+                <div class="image-container" :style="'background-image: url(/image/' + product.picPath + ')'"></div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">&yen;{{product.price}}</h5>
+                <a :href="'/productDetail?productId='+product.productId" class="stretched-link">{{product.name}}</a>
+                <p class="card-text">{{product.sellerName}}</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!--底部-->
+<div class="border border-danger mt-5">
+    <p class="text text-black-50 text-center my-5">
+        版权信息：Copyright [dates] by [author/owner]
+
+        提醒浏览者，所看到的内容是受到版权保护的
+
+        一些分享类网站底部信息都会加一句话：本站内容来自互联网，如有侵权请联系站长删除！
+    </p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script th:inline="javascript">
+
+    $(function (){
+        var vm = new Vue({
+            el:'#mContainer',
+            data:{
+                clothes:[[${clothes}]],
+                bags:[[${bags}]],
+                homeApply:[[${homeApply}]],
+                furniture:[[${furniture}]],
+                keyWord: null
+            },
+            methods:{
+
+            }
+        })
+    })
+</script>
+</body>
+</html>

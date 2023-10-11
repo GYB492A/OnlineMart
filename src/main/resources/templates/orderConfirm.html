@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaaf.org"
+      xmlns:sec="http://www.thymeleaaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+
+    <title>订单确认</title>
+</head>
+<body>
+<!--导航条-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/index">网上商城</a>
+    <div class="container d-flex flex-column flex-md-row justify-content-between navbar-nav">
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">我的淘宝</a>
+        <a class="nav-link" href="/myOrder?curPage=1&rowsPerPage=24" sec:authorize="hasRole('BUYER')">我的订单</a>
+        <a class="nav-link" href="/myShoppingCar" sec:authorize="hasRole('BUYER')">我的购物车</a>
+        <a class="nav-link" href="/myProduct?curPage=1&rowsPerPage=24" sec:authorize="hasRole('SELLER')">我的商品</a>
+        <a class="nav-link" href="/productList?curPage=1&rowsPerPage=24">商品分类</a>
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">登陆/注册</a>
+        <a class="nav-link" sec:authorize="!isAnonymous()"
+           th:text="'欢迎您!' + ${#authentication.getName()}">欢迎您！ xxx</a>
+        <a class="nav-link" href="/logout" sec:authorize="!isAnonymous()">安全退出</a>
+    </div>
+</nav>
+<div id="mContainer" class="container">
+    <div class="modal fade" id="successModal" data-keyboard="false"
+         tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-tiele">支付成功</h5>
+                </div>
+                <div class="modal-body">
+                    <h5>恭喜你！订单支付成功</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-pri"
+                            data-dismiss="modal">确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--搜索框-->
+    <div class="input-group mt-5">
+        <input type="text" class="form-control" placeholder="请输入关键字"
+               v-model="keyWord">
+        <div class="input-group-append">
+            <a class="ml-3 btn btn-outline-secondary"
+               v-bind:href="'/productList?curPage=1&rowsPerPage=24&typeId=1&keyWord=' + keyWord">
+                搜索</a>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="p-3 h5 border">收件人信息</div>
+        <div class="p-3">
+            <div class="h5" th:text="'收件人姓名：'+${#authentication.principal.username}">收件人姓名：{{items}}</div>
+            <div class="h5" th:text="'性别：'+${#authentication.principal.gender?'男性':'女性'}">性别：</div>
+            <div class="h5" th:text="'手机号：'+${#authentication.principal.phoneNum}">手机号：</div>
+            <div class="h5" th:text="'收件地址：：'+${#authentication.principal.address}">收件地址：</div>
+        </div>
+        <div class="mt-5 h5">
+            确认订单信息
+        </div>
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-3 text-center">宝贝信息</div>
+                <div class="col-3 text-center">商品属性</div>
+                <div class="col-2 text-center">单价</div>
+                <div class="col-2 text-center">数量</div>
+                <div class="col-2 text-center">小计</div>
+            </div>
+            <div class="border border-primary mt-2"></div>
+            <div class="container mt-2" v-for="(item,index) in items">
+                <div>店铺：{{item.sellerName}}的店铺</div>
+                <div class="row mt-2">
+                    <div class="col-3 d-flex">
+                        <img :src="'/image/'+item.picPath" class="mh-100 mw-100" style="width: 50px;height: 50px">
+                        <div>{{item.productName}}</div>
+                    </div>
+                    <div class="col-3">
+                        <div>品牌：{{item.brandName}}</div>
+                        <div>保质期：{{item.shelfLife}}</div>
+                        <div>制造商：{{item.producer}}</div>
+                    </div>
+                    <div class="col-2 text-center">&yen;{{item.price}}</div>
+                    <div class="col-2 d-flex justify-content-center">
+                        <button type="button" class="border bg-white text-center"
+                                style="height: 28px;width: 28px;line-height: 28px"
+                                @click="amountChange(-1,index)">
+                            -
+                        </button>
+                        <input type="text" class="form-control form-control-sm" style="" v-model="item.amount">
+                        <button type="button" class="border bg-white text-center"
+                                style="height: 28px;width: 28px;line-height: 28px"
+                                @click="amountChange(1,index)">
+                            +
+                        </button>
+                    </div>
+                    <div class="col-2 text-danger h5 text-center">&yen;{{item.price * item.amount}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-end mt-5">
+            <div class="col-4 d-flex flex-column align-items-end ">
+                <div class="mb-4">
+                    <span class="font-weight-bold">实付款：</span>
+                    <span class="h2 font-weight-bold text-secondary">￥</span>
+                    <span class="h2 font-weight-bold text-danger">{{totalPrice}}</span>
+                </div>
+                <div>
+                    <span class="font-weight-bold">寄送至：</span>
+                    <span sec:authentication="principal.address">xxx</span>
+                </div>
+                <div>
+                    <span class="font-weight-bold">收货人：</span>
+                    <span sec:authentication="principal.username">xxx</span>
+                    <span sec:authentication="principal.phoneNum">xxx</span>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-2 p-0">
+                <button type="button" class="btn btn-danger w-100" @click="submitOrder">确认付款</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--底部-->
+<div class="border border-danger mt-5">
+    <p class="text text-black-50 text-center my-5">
+        版权信息：Copyright [dates] by [author/owner]
+
+        提醒浏览者，所看到的内容是受到版权保护的
+
+        一些分享类网站底部信息都会加一句话：本站内容来自互联网，如有侵权请联系站长删除！
+    </p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script th:inline="javascript">
+    const CODE_OK = 0
+    $(function () {
+        var vm = new Vue({
+            el: '#mContainer',
+            data: {
+                keyWord: null,
+                items: [[${items}]],
+                isFromShoppingCar: [[${isFromShoppingCar}]]
+            },
+            computed: {
+                totalPrice: function () {
+                    var sum = 0
+                    for (idx in this.items) {
+                        sum += this.items[idx].price * this.items[idx].amount;
+                    }
+                    return sum;
+                }
+            },
+            methods: {
+                amountChange: function (data, i) {
+                    var regPos = /^\d+$/;
+                    if (regPos.test(this.items[i].amount)) {
+                        var valInt = parseInt(this.items[i].amount, 10)
+                        if (valInt + data >= 1 && valInt + data <= this.items[i].quantity) {
+                            valInt += data
+                            this.items[i].amount = valInt
+                        }
+                    }
+                },
+                submitOrder: function () {
+                    var url = '/order/submit?isFromShoppingCar='
+                    if (this.isFromShoppingCar) {
+                        url += 'true'
+                    } else {
+                        url += 'false'
+                    }
+                    $.ajax({
+                        url: url,
+                        data: JSON.stringify(this.items),
+                        method: 'post',
+                        contentType: 'application/json;charset=utf-8',
+                        success: (data) => {
+                            if (data.STATUS_CODE == CODE_OK) {
+                                $('#successModal').modal('show')
+                            } else {
+                                alert("订单支付失败!")
+                            }
+                        }
+                    })
+                }
+            }
+        })
+        $('#successModal').on('hidden.bs.modal', function (e) {
+            $(location).attr('href', 'index')
+        })
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+
+    <title>用户注册</title>
+
+</head>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .container {
+        max-width: 400px;
+        margin-top: 100px;
+    }
+
+    .modal-body {
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+<body>
+<div id="mContainer" class="container">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDialog" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">注册成功</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    恭喜您注册成功
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @click="goLogin">确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1 style="text-align: center;margin-bottom: 30px;color: #333;">用户注册</h1>
+    <form>
+        <div class="form-group row">
+            <label for="username" class="col-sm-2 col-form-label">用户名</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="username" v-model="username">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="password" class="col-sm-2 col-form-label">密码</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="password" v-model="password">
+            </div>
+        </div>
+        <fieldset class="form-group row">
+            <legend class="col-form-label col-sm-2 float-sm-left pt-0">性别</legend>
+            <div class="col-sm-10">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender"
+                           id="male" value=true v-model="gender">
+                    <label class="form-check-label" for="male">
+                        男性
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender"
+                           id="female" value="false" v-model="gender">
+                    <label class="form-check-label" for="female">
+                        女性
+                    </label>
+                </div>
+
+            </div>
+        </fieldset>
+        <div class="form-group row">
+            <label for="phoneNum" class="col-sm-2 col-form-label">手机号</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="phoneNum" v-model="phoneNum">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="address" class="col-sm-2 col-form-label">详细地址</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="address" v-model="address">
+            </div>
+        </div>
+        <fieldset class="form-group row">
+            <legend class="col-form-label col-sm-2 float-sm-left pt-0">角色</legend>
+            <div class="col-sm-10">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="role"
+                           id="buyer" value="1" v-model="rid">
+                    <label class="form-check-label" for="buyer">
+                        顾客
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="role"
+                           id="seller" value="2" v-model="rid">
+                    <label class="form-check-label" for="seller">
+                        店主
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+        <div class="form-group">
+            <a href="/login">已有账号？马上登陆</a>
+        </div>
+        <div class="form-group row text-center">
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-primary" @click="userRegister">马上注册</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script>
+    const CODE_OK = 0;
+    $(function () {
+        var vm = new Vue({
+            el: '#mContainer',
+            data: {
+                username: '',
+                password: '',
+                gender: 'true',
+                phoneNum: '',
+                address: '',
+                rid: '1'
+            },
+            methods: {
+                userRegister: function () {
+                    $.get(
+                        '/user/register',
+                        {
+                            username: this.username,
+                            password: this.password,
+                            gender: this.gender,
+                            phoneNum: this.phoneNum,
+                            address: this.address,
+                            rid: this.rid
+                        },
+                        (data) => {
+                            if (data.STATUS_CODE == CODE_OK) {
+                                $('#myDialog').modal('show')
+                            } else {
+                                alert("注册失败")
+                            }
+                        }
+                    )
+                },
+                goLogin: function () {
+                    $(location).attr('href', '/login')
+                }
+            }
+
+        })
+    })
+</script>
+</body>
+</html>

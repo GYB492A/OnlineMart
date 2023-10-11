@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaaf.org"
+      xmlns:sec="http://www.thymeleaaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+
+    <title>上架商品</title>
+</head>
+<body>
+<!--导航栏-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/index">网上商城</a>
+    <div class="container d-flex flex-column flex-md-row justify-content-between navbar-nav">
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">我的淘宝</a>
+        <a class="nav-link" href="/myOrder?curPage=1&rowsPerPage=24" sec:authorize="hasRole('BUYER')">我的订单</a>
+        <a class="nav-link" href="#">我的购物车</a>
+        <a class="nav-link" href="/myProduct?curPage=1&rowsPerPage=24" sec:authorize="hasRole('SELLER')">我的商品</a>
+        <a class="nav-link" href="/productList?curPage=1&rowsPerPage=24">商品分类</a>
+        <a class="nav-link" href="/login" sec:authorize="isAnonymous()">登陆/注册</a>
+        <a class="nav-link" href="/myprofile" sec:authorize="!isAnonymous()"
+           th:text="'欢迎您!' + ${#authentication.getName()}">欢迎您！ xxx</a>
+        <a class="nav-link" href="/logout" sec:authorize="!isAnonymous()">安全退出</a>
+    </div>
+</nav>
+
+<div class="modal fade" id="myDialog" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">上架成功</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                恭喜您上架商品成功！请马上查看吧！
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        @click="goLogin">确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mContainer" class="container">
+    <!--搜索框-->
+    <div class="input-group mt-5">
+        <input type="text" class="form-control" placeholder="请输入关键字"
+               v-model="keyWord">
+        <div class="input-group-append">
+            <a class="ml-3 btn btn-outline-secondary"
+               v-bind:href="'/productList?curPage=1&rowsPerPage=24&typeId=1&keyWord=' + keyWord">
+                搜索</a>
+        </div>
+    </div>
+    <form class="w-50 mx-auto mt-5 p-3 border" enctype="multipart/form-data">
+        <div class="form-group row">
+            <label for="productName" class="col-sm-2 col-form-label">商品名称</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="productName" v-model="productName">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="price" class="col-sm-2 col-form-label">商品单价</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="price" v-model="price">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="quantity" class="col-sm-2 col-form-label">商品数量</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="quantity" v-model="quantity">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="file" class="col-sm-2 col-form-label">商品图片</label>
+            <div class="col-sm-10">
+                <input type="file" class="form-control-file"
+                       id="file" @change="changeFile">
+            </div>
+        </div>
+
+        <fieldset class="form-group row">
+            <legend class="col-form-label col-sm-2 float-sm-left pt-0">商品类型</legend>
+            <div class="col-sm-10">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="typeId" id="clothes" value="1"
+                           v-model="typeId">
+                    <label class="form-check-label" for="clothes">
+                        衣服
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="typeId" id="bags" value="2"
+                           v-model="typeId">
+                    <label class="form-check-label" for="bags">
+                        鞋包
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="typeId" id="homeApply" value="3"
+                           v-model="typeId">
+                    <label class="form-check-label" for="homeApply">
+                        家电
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="typeId" id="furnitrue" value="4"
+                           v-model="typeId">
+                    <label class="form-check-label" for="furnitrue">
+                        家具
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="form-group row">
+            <label for="fullName" class="col-sm-2 col-form-label">商品全称</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="fullName" v-model="fullName">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="brandName" class="col-sm-2 col-form-label">品牌全称</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="brandName" v-model="brandName">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="shelfLife" class="col-sm-2 col-form-label">保质期限</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="shelfLife" v-model="shelfLife">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="producer" class="col-sm-2 col-form-label">生产厂商</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="producer" v-model="producer">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="producerAddress" class="col-sm-2 col-form-label">生产地址</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="producerAddress" v-model="producerAddress">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="tel" class="col-sm-2 col-form-label">厂商电话</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       id="tel" v-model="tel">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="description" class="col-sm-2 col-form-label">商品详情</label>
+            <div class="col-sm-10">
+        <textarea rows="3" class="form-control"
+                  id="description" v-model="description"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row justify-content-center">
+            <div class="col-sm-10 w-25">
+                <button type="button" class="btn btn-primary btn-block" @click="addProduct">上架商品</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--底部-->
+<div class="border border-danger mt-5">
+    <p class="text text-black-50 text-center my-5">
+        版权信息：Copyright [dates] by [author/owner]
+
+        提醒浏览者，所看到的内容是受到版权保护的
+
+        一些分享类网站底部信息都会加一句话：本站内容来自互联网，如有侵权请联系站长删除！
+    </p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"
+        crossorigin="anonymous"></script>
+<script th:inline="javascript">
+    const CODE_OK = 0
+    $(function () {
+        var vm = new Vue({
+            el: '#mContainer',
+            data: {
+                keyWord: null,
+                productName: null,
+                price: null,
+                quantity: null,
+                file: null,
+                typeId: null,
+                fullName: null,
+                brandName: null,
+                shelfLife: null,
+                producer: null,
+                producerAddress: null,
+                tel: null,
+                description: null
+            },
+            methods: {
+                changeFile: function (event) {
+                    this.file = event.target.files[0]
+                },
+                addProduct: function () {
+                    var formData = new FormData()
+                    formData.append("productName", this.productName)
+                    formData.append("price", this.price)
+                    formData.append("quantity", this.quantity)
+                    formData.append("file", this.file)
+                    formData.append("typeId", this.typeId)
+                    formData.append("fullName", this.fullName)
+                    formData.append("brandName", this.brandName)
+                    formData.append("shelfLife", this.shelfLife)
+                    formData.append("producer", this.producer)
+                    formData.append("producerAddress", this.producerAddress)
+                    formData.append("tel", this.tel)
+                    formData.append("description", this.description)
+
+                    $.ajax({
+                        url: '/product/add',
+                        data: formData,
+                        method: 'post',
+                        contentType: false,
+                        processData: false,
+                        success: (data) => {
+                            if (data.STATUS_CODE == CODE_OK) {
+                                $('#myDialog').modal('show')
+                            } else {
+                                alert('上架商品失败!')
+                            }
+                        }
+                    })
+                }
+            }
+        })
+        $('#myDialog').on('hidden.bs.modal'), function (e) {
+            $(location).attr('href', 'index')
+        }
+    })
+</script>
+</body>
+</html>
